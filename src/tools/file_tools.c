@@ -82,10 +82,10 @@ int tool_read_file(const char *args_json, char *result, int result_capacity) {
             written += n;
             ++emitted;
         }
-        if (n < 0 || written + n >= result_capacity) {
+        ++line_no;
+        if (written >= result_capacity) {
             break;
         }
-        ++line_no;
     }
 
     fclose(f);
