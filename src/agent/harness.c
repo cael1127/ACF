@@ -136,8 +136,10 @@ int agent_run_turn(Agent *agent, const char *user_input, char *response, int res
             hash_args(args_json, args_hash, (int)sizeof(args_hash));
             loop_detector_record(tool_name, args_hash);
             if (loop_detector_is_stuck()) {
+                char seq[256];
+                loop_detector_last_sequence(seq, (int)sizeof(seq));
                 snprintf(obs, sizeof(obs),
-                         "Aborting: repeated calls to %s with same arguments.", tool_name);
+                         "Aborting: repeated calls detected. Sequence: %s", seq);
             } else if (!guardrails_is_tool_allowed(agent->role, tool_name, tool->is_write)) {
                 snprintf(obs, sizeof(obs),
                          "Tool %s is not allowed for role %s.", tool_name, agent->role);

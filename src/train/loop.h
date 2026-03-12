@@ -18,6 +18,8 @@ typedef struct {
 } TrainConfig;
 
 int train_step(const TrainConfig *cfg, Transformer *model, Dataset *ds);
+double train_epoch(const TrainConfig *cfg, Transformer *model, Dataset *ds, int steps);
+void toy_dataset_init(Dataset *ds);
 
 #endif /* TRAIN_LOOP_H */
 

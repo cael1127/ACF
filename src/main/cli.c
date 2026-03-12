@@ -7,7 +7,43 @@
 #include <stdio.h>
 #include <string.h>
 
-int main(void) {
+static int run_eval_script(const char *path, Agent *agent) {
+    FILE *f = fopen(path, "r");
+    if (!f) {
+        log_error("Failed to open eval script");
+        return 1;
+    }
+    char line[2048];
+    char response[4096];
+    int cases = 0;
+    int passed = 0;
+    while (fgets(line, sizeof(line), f)) {
+        char *nl = strchr(line, '\n');
+        if (nl) *nl = '\0';
+        if (line[0] == '\0') continue;
+        char *sep = strchr(line, '|');
+        if (!sep) continue;
+        *sep = '\0';
+        const char *prompt = line;
+        const char *expected = sep + 1;
+        if (agent_run_turn(agent, prompt, response, (int)sizeof(response)) == 0) {
+            ++cases;
+            if (strstr(response, expected) != NULL) {
+                ++passed;
+                printf("[OK] %s\n", prompt);
+            } else {
+                printf("[FAIL] %s\nExpected substring: %s\nGot: %s\n", prompt, expected, response);
+            }
+        }
+    }
+    fclose(f);
+    char msg[128];
+    snprintf(msg, sizeof(msg), "Eval finished: %d/%d passed", passed, cases);
+    log_info(msg);
+    return (cases == passed) ? 0 : 1;
+}
+
+int main(int argc, char **argv) {
     log_info("Starting compound_ai_cli");
 
     ExternalModelConfig cfg;
@@ -24,6 +60,12 @@ int main(void) {
 
     Agent agent;
     agent_init(&agent, &iface, "executor");
+
+    if (argc >= 3 && strcmp(argv[1], "--eval") == 0) {
+        int rc = run_eval_script(argv[2], &agent);
+        agent_free(&agent);
+        return rc;
+    }
 
     char line[1024];
     char response[4096];

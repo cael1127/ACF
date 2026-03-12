@@ -22,6 +22,7 @@ add_library(model STATIC
     src/model/checkpoint.c
     src/model/interface.c
     src/model/external.c
+    src/model/vocab.c
 )
 
 target_link_libraries(model PUBLIC core)

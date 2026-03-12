@@ -34,3 +34,19 @@ int loop_detector_is_stuck(void) {
     return 0;
 }
 
+int loop_detector_last_sequence(char *buf, int cap) {
+    if (!buf || cap <= 0) return -1;
+    buf[0] = '\0';
+    int written = 0;
+    for (int i = 0; i < g_count; ++i) {
+        int n = snprintf(buf + written, (size_t)(cap - written),
+                         "%s%s(%s)",
+                         (i == 0 ? "" : " -> "),
+                         g_history[i].tool,
+                         g_history[i].args);
+        if (n < 0 || written + n >= cap) break;
+        written += n;
+    }
+    return 0;
+}
+

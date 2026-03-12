@@ -33,10 +33,8 @@ After building, you can run a small test suite:
 
 ```bash
 cd build
-ctest   # if you add CTest, or:
 ./compound_ai_tests  # run the test binary directly
 ```
 
-The tests exercise core math (attention, RoPE) and the tool layer (`read_file`, `edit_file`, `run_command`) to make it easier to validate changes.
-
+The tests exercise core math (attention, RoPE), the tool layer (`read_file`, `edit_file`, `run_command`), memory compaction, router selection, and HTTP request parsing.
 
