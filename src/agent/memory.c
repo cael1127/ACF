@@ -2,6 +2,17 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+static char *memory_strdup(const char *s) {
+    if (!s) return NULL;
+    size_t len = strlen(s);
+    char *p = (char *)malloc(len + 1);
+    if (!p) return NULL;
+    memcpy(p, s, len);
+    p[len] = '\0';
+    return p;
+}
 
 void memory_init(AgentMemory *m) {
     if (!m) return;
@@ -35,8 +46,8 @@ int memory_add_exchange(AgentMemory *m, const char *role, const char *content) {
         m->working_capacity = new_cap;
     }
     MemoryTurn *t = &m->working[m->working_count++];
-    t->role = _strdup(role);
-    t->content = _strdup(content);
+    t->role = memory_strdup(role);
+    t->content = memory_strdup(content);
     return 0;
 }
 
@@ -85,15 +96,14 @@ int memory_compact_if_needed(AgentMemory *m, int token_budget) {
         if (!summary) return -1;
         summary[0] = '\0';
         if (m->episodic_summary) {
-            strcat_s(summary, (size_t)buf_size, m->episodic_summary);
-            strcat_s(summary, (size_t)buf_size, "\n---\n");
+            snprintf(summary, (size_t)buf_size, "%s\n---\n", m->episodic_summary);
         }
         for (int i = 0; i < m->working_count; ++i) {
-            strcat_s(summary, (size_t)buf_size, "[");
-            strcat_s(summary, (size_t)buf_size, m->working[i].role);
-            strcat_s(summary, (size_t)buf_size, "] ");
-            strcat_s(summary, (size_t)buf_size, m->working[i].content);
-            strcat_s(summary, (size_t)buf_size, "\n");
+            int used = (int)strlen(summary);
+            int remaining = buf_size - used;
+            if (remaining <= 1) break;
+            snprintf(summary + used, (size_t)remaining, "[%s] %s\n",
+                     m->working[i].role, m->working[i].content);
         }
         free(m->episodic_summary);
         m->episodic_summary = summary;
@@ -114,15 +124,14 @@ int memory_compact_if_needed(AgentMemory *m, int token_budget) {
     if (!summary) return -1;
     summary[0] = '\0';
     if (m->episodic_summary) {
-        strcat_s(summary, (size_t)buf_size, m->episodic_summary);
-        strcat_s(summary, (size_t)buf_size, "\n---\n");
+        snprintf(summary, (size_t)buf_size, "%s\n---\n", m->episodic_summary);
     }
     for (int i = 0; i < cutoff; ++i) {
-        strcat_s(summary, (size_t)buf_size, "[");
-        strcat_s(summary, (size_t)buf_size, m->working[i].role);
-        strcat_s(summary, (size_t)buf_size, "] ");
-        strcat_s(summary, (size_t)buf_size, m->working[i].content);
-        strcat_s(summary, (size_t)buf_size, "\n");
+        int used = (int)strlen(summary);
+        int remaining = buf_size - used;
+        if (remaining <= 1) break;
+        snprintf(summary + used, (size_t)remaining, "[%s] %s\n",
+                 m->working[i].role, m->working[i].content);
         free(m->working[i].role);
         free(m->working[i].content);
     }
