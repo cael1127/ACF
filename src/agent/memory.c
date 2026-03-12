@@ -45,8 +45,9 @@ int memory_get_context(const AgentMemory *m, char *out, int out_capacity) {
     out[0] = '\0';
     int len = 0;
     if (m->episodic_summary) {
-        len = (int)strncpy_s(out, (size_t)out_capacity, m->episodic_summary, _TRUNCATE);
-        if (len < 0) return -1;
+        int written = snprintf(out, (size_t)out_capacity, "%s", m->episodic_summary);
+        if (written < 0) return -1;
+        len = written;
     }
     for (int i = 0; i < m->working_count; ++i) {
         const MemoryTurn *t = &m->working[i];

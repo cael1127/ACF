@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 int attention_scaled_dot_product(const Tensor *q,
                                  const Tensor *k,

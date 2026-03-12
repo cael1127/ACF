@@ -18,8 +18,8 @@ int loop_detector_record(const char *tool_name, const char *args_hash) {
     for (int i = g_count - 1; i > 0; --i) {
         g_history[i] = g_history[i - 1];
     }
-    strncpy_s(g_history[0].tool, sizeof(g_history[0].tool), tool_name, _TRUNCATE);
-    strncpy_s(g_history[0].args, sizeof(g_history[0].args), args_hash, _TRUNCATE);
+    snprintf(g_history[0].tool, sizeof(g_history[0].tool), "%s", tool_name);
+    snprintf(g_history[0].args, sizeof(g_history[0].args), "%s", args_hash);
     return 0;
 }
 

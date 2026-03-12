@@ -12,7 +12,7 @@
 static void agent_set_role(Agent *agent, const char *role) {
     if (!agent) return;
     const char *r = role && role[0] ? role : "executor";
-    strncpy_s(agent->role, sizeof(agent->role), r, _TRUNCATE);
+    snprintf(agent->role, sizeof(agent->role), "%s", r);
 }
 
 void agent_init(Agent *agent, ModelInterface *model, const char *role) {
@@ -74,7 +74,7 @@ static int parse_final(const char *model_output, char *final, int final_cap) {
     if (!p) return 0;
     p += 6;
     while (*p == ' ' || *p == '\t') ++p;
-    strncpy_s(final, (size_t)final_cap, p, _TRUNCATE);
+    snprintf(final, (size_t)final_cap, "%s", p);
     return 1;
 }
 
@@ -82,7 +82,7 @@ int agent_run_turn(Agent *agent, const char *user_input, char *response, int res
     if (!agent || !user_input || !response || response_capacity <= 0) return -1;
 
     if (!agent->model) {
-        strncpy_s(response, (size_t)response_capacity, "No model configured.", _TRUNCATE);
+        snprintf(response, (size_t)response_capacity, "%s", "No model configured.");
         return 0;
     }
 
@@ -107,13 +107,13 @@ int agent_run_turn(Agent *agent, const char *user_input, char *response, int res
         int rc = model_interface_infer(agent->model, system_prompt, context,
                                        model_output, (int)sizeof(model_output));
         if (rc != 0) {
-            strncpy_s(response, (size_t)response_capacity, "Model error.", _TRUNCATE);
+            snprintf(response, (size_t)response_capacity, "%s", "Model error.");
             return rc;
         }
 
         char final_buf[1024];
         if (parse_final(model_output, final_buf, (int)sizeof(final_buf))) {
-            strncpy_s(response, (size_t)response_capacity, final_buf, _TRUNCATE);
+            snprintf(response, (size_t)response_capacity, "%s", final_buf);
             memory_add_exchange(&agent->memory, "assistant", response);
             return 0;
         }
@@ -122,7 +122,7 @@ int agent_run_turn(Agent *agent, const char *user_input, char *response, int res
         char args_json[512];
         if (!parse_action(model_output, tool_name, (int)sizeof(tool_name),
                           args_json, (int)sizeof(args_json))) {
-            strncpy_s(response, (size_t)response_capacity, model_output, _TRUNCATE);
+            snprintf(response, (size_t)response_capacity, "%s", model_output);
             memory_add_exchange(&agent->memory, "assistant", response);
             return 0;
         }
@@ -159,8 +159,8 @@ int agent_run_turn(Agent *agent, const char *user_input, char *response, int res
         memory_add_exchange(&agent->memory, "observation", obs);
     }
 
-    strncpy_s(response, (size_t)response_capacity,
-              "Max ReAct steps reached without Final.", _TRUNCATE);
+    snprintf(response, (size_t)response_capacity,
+             "%s", "Max ReAct steps reached without Final.");
     memory_add_exchange(&agent->memory, "assistant", response);
     return 0;
 }

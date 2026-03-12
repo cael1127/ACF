@@ -30,8 +30,8 @@ static Agent *get_or_create_agent(const char *session_id) {
     for (int i = 0; i < MAX_SESSIONS; ++i) {
         if (!g_sessions[i].in_use) {
             g_sessions[i].in_use = 1;
-            strncpy_s(g_sessions[i].session_id, sizeof(g_sessions[i].session_id),
-                      session_id, _TRUNCATE);
+            snprintf(g_sessions[i].session_id, sizeof(g_sessions[i].session_id),
+                     "%s", session_id);
             agent_init(&g_sessions[i].agent, &g_external_model, "executor");
             return &g_sessions[i].agent;
         }

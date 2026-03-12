@@ -1,4 +1,5 @@
 #include "core/rope.h"
+#include <math.h>
 
 int rope_apply(const RoPEConfig *cfg, Tensor *q, Tensor *k, int position_offset) {
     if (!cfg || !q || !k) return -1;
